@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For You ❤️</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial, Helvetica, sans-serif;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+overflow:hidden;
+background:#000;
+color:#333;
+}
+
+/* background slideshow */
+
+#bg{
+position:fixed;
+inset:0;
+background-size:cover;
+background-position:center;
+filter:blur(10px) brightness(0.55);
+transition:background-image 1s ease;
+z-index:-1;
+}
+
+/* card */
+
+.card{
+background:white;
+padding:26px;
+width:360px;
+border-radius:20px;
+text-align:center;
+box-shadow:0 10px 40px rgba(0,0,0,0.4);
+}
+
+h2{
+margin:10px 0;
+}
+
+img{
+width:100%;
+border-radius:14px;
+margin:10px 0;
+}
+
+button{
+padding:12px 18px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-size:15px;
+margin:6px;
+}
+
+.yes{background:#4CAF50;color:white;}
+.no{background:#ff4d6d;color:white;}
+.next{background:#6c63ff;color:white;}
+
+#answer{
+margin-top:10px;
+font-weight:bold;
+min-height:40px;
+}
+
+/* overlays */
+
+.overlay{
+position:fixed;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+background:rgba(0,0,0,0.6);
+z-index:10;
+}
+
+input{
+padding:10px;
+border-radius:10px;
+border:1px solid #ccc;
+width:200px;
+}
+
+.countdown{
+margin-top:10px;
+font-weight:bold;
+}
+
+canvas{
+position:fixed;
+inset:0;
+pointer-events:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="bg"></div>
+
+<canvas id="confetti"></canvas>
+
+<!-- PASSWORD -->
+
+<div class="overlay" id="gate">
+<div class="card">
+<h2>Secret page 🔒</h2>
+<input id="pw" type="password" placeholder="Password">
+<br><br>
+<button onclick="unlock()">Enter</button>
+<p id="hint"></p>
+</div>
+</div>
+
+<!-- MAIN -->
+
+<div class="card" id="app" style="display:none">
+
+<h2 id="question"></h2>
+
+<img id="photo" style="display:none">
+
+<div>
+<button class="yes" id="yes">Yes</button>
+<button class="no" id="no">No</button>
+</div>
+
+<div id="answer"></div>
+
+<button class="next" id="next" style="display:none">Next</button>
+
+<div class="countdown" id="countdown"></div>
+
+</div>
+
+<script>
+
+/* SETTINGS */
+
+const PASSWORD = "iloveyou"
+
+const MUSIC = "assets/music.mp3"
+
+const MEET_DATE = "2026-10-30T18:00:00"
+
+const questions = [
+
+{
+q:"Do you remember this moment?",
+yes:"One of my favourite pictures ❤️",
+no:"How could you forget 😭",
+img:"images/1.JPG"
+},
+
+{
+q:"Are we cute together?",
+yes:"Obviously 😌",
+no:"Incorrect answer",
+img:"images/3.jpg"
+},
+
+{
+q:"Do you know how much I love you?",
+yes:"I thought so too 😎",
+no:"Fake news",
+img:"images/4.jpg"
+}
+
+]
+
+const finalQuestion = {
+
+q:"Will you be my forever person? 💍",
+
+yes:"You just made me the happiest person alive ❤️",
+
+no:"Nice try 😌",
+
+img:"images/5.jpg"
+
+}
+
+/* FLOW */
+
+const flow = [...questions, finalQuestion]
+
+let step = 0
+
+/* PASSWORD */
+
+function unlock(){
+
+if(document.getElementById("pw").value === PASSWORD){
+
+document.getElementById("gate").style.display="none"
+document.getElementById("app").style.display="block"
+
+startMusic()
+startCountdown()
+render()
+
+}else{
+
+document.getElementById("hint").innerText="Wrong password 😌"
+
+}
+
+}
+
+/* MUSIC */
+
+function startMusic(){
+
+if(!MUSIC) return
+
+let audio = new Audio(MUSIC)
+
+audio.loop = true
+audio.volume = 0.35
+
+audio.play().catch(()=>{})
+
+}
+
+/* RENDER */
+
+function render(){
+
+let item = flow[step]
+
+document.getElementById("question").innerText = item.q
+
+let photo = document.getElementById("photo")
+
+if(item.img){
+
+photo.src = item.img
+photo.style.display="block"
+
+document.getElementById("bg").style.backgroundImage = `url(${item.img})`
+
+}
+
+document.getElementById("answer").innerText=""
+document.getElementById("next").style.display="none"
+
+}
+
+/* BUTTONS */
+
+document.getElementById("yes").onclick = ()=>{
+
+confetti(150)
+
+document.getElementById("answer").innerText = flow[step].yes
+
+document.getElementById("next").style.display="inline-block"
+
+if(step === flow.length-1){
+
+stopNo()
+
+}
+
+}
+
+document.getElementById("no").onclick = ()=>{
+
+document.getElementById("answer").innerText = flow[step].no
+
+document.getElementById("next").style.display="inline-block"
+
+}
+
+/* NEXT */
+
+document.getElementById("next").onclick = ()=>{
+
+step++
+
+if(step >= flow.length){
+
+end()
+
+return
+
+}
+
+render()
+
+}
+
+/* END */
+
+function end(){
+
+document.getElementById("question").innerText = "Our memories ❤️"
+
+document.getElementById("photo").style.display="none"
+
+document.getElementById("answer").innerHTML = `
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+<img src="images/10.jpg">
+<img src="images/11.jpg">
+<img src="images/12.jpg">
+<img src="images/13.JPG">
+
+</div>
+
+<p style="margin-top:15px;font-size:18px">
+I love you Forever Meaghan.
+</p>
+
+`
+
+document.getElementById("next").style.display="none"
+
+document.getElementById("yes").style.display="none"
+document.getElementById("no").style.display="none"
+
+}
+
+/* RUNAWAY NO */
+
+let runaway = true
+
+document.addEventListener("mousemove",e=>{
+
+if(!runaway) return
+
+let btn = document.getElementById("no")
+
+let rect = btn.getBoundingClientRect()
+
+let dx = rect.left - e.clientX
+let dy = rect.top - e.clientY
+
+let dist = Math.sqrt(dx*dx + dy*dy)
+
+let limit = step === flow.length-1 ? 250 : 120
+
+if(dist < limit){
+
+btn.style.position="fixed"
+
+btn.style.left = Math.random()*window.innerWidth + "px"
+btn.style.top = Math.random()*window.innerHeight + "px"
+
+}
+
+})
+
+function stopNo(){
+
+runaway = false
+
+let btn = document.getElementById("no")
+
+btn.style.position="static"
+
+}
+
+/* COUNTDOWN */
+
+function startCountdown(){
+
+let box = document.getElementById("countdown")
+
+setInterval(()=>{
+
+let diff = new Date(MEET_DATE) - new Date()
+
+if(diff < 0){
+
+box.innerText="You're together now ❤️"
+
+return
+
+}
+
+let s = Math.floor(diff/1000)
+
+let d = Math.floor(s/86400)
+let h = Math.floor((s%86400)/3600)
+let m = Math.floor((s%3600)/60)
+
+box.innerText = `Next time we meet in ${d}d ${h}h ${m}m`
+
+},1000)
+
+}
+
+/* CONFETTI */
+
+const canvas = document.getElementById("confetti")
+const ctx = canvas.getContext("2d")
+
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
+
+let pieces = []
+
+function confetti(n){
+
+for(let i=0;i<n;i++){
+
+pieces.push({
+
+x:Math.random()*canvas.width,
+y:-20,
+r:5+Math.random()*5,
+vx:-2+Math.random()*4,
+vy:2+Math.random()*4,
+life:100,
+color:`hsl(${Math.random()*360},90%,60%)`
+
+})
+
+}
+
+requestAnimationFrame(draw)
+
+}
+
+function draw(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+pieces.forEach(p=>{
+
+p.x+=p.vx
+p.y+=p.vy
+p.life--
+
+ctx.fillStyle=p.color
+ctx.beginPath()
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2)
+ctx.fill()
+
+})
+
+pieces = pieces.filter(p=>p.life>0)
+
+if(pieces.length) requestAnimationFrame(draw)
+
+}
+
+</script>
+
+</body>
+</html>
